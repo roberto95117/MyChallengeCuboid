@@ -26,4 +26,16 @@ public class BagDTO {
     private Double payloadVolume;
     private Double availableVolume;
     private List<CuboidDTO> cuboids;
+    
+    public Double getPayloadVolume() {
+    	Double pl = 0d;
+    	for(CuboidDTO item : cuboids) {
+    		pl = pl + item.getVolume();
+    	}
+    	return pl;
+    }
+    
+    public Double getAvailableVolume() {
+    	return this.volume - this.getPayloadVolume();
+    }
 }

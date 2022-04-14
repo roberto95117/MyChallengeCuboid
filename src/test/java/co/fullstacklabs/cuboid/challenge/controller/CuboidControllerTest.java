@@ -1,10 +1,13 @@
 package co.fullstacklabs.cuboid.challenge.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,37 +40,71 @@ class CuboidControllerTest {
 
     @Test
     void shouldUpdateCuboid() throws Exception {
-        assertTrue(true);
+    	CuboidDTO cuboidDTO = CuboidDTO.builder()
+                .id(1l).width(2f).height(3f).depth(2f).volume(12d).bagId(3L).build();
+
+        this.mockMvc.perform(put(PATH).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cuboidDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
     void invalidInputInUpdateShouldReturnError() throws Exception {
-        assertTrue(true);
+    	CuboidDTO cuboidDTO = CuboidDTO.builder()
+                .id(1l).width(2f).height(3f).depth(2f).volume(12d).build();
+    	
+    	this.mockMvc.perform(put(PATH).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cuboidDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.violations", IsNot.not(IsNull.nullValue())));
     }
 
     @Test
     void shouldGetErrorWhenCuboidByIdIsEmpty() throws Exception {
-        assertTrue(true);
+       this.mockMvc.perform(get(PATH + "/{id}", 5l))
+       .andExpect(status().isNotFound())
+       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+       .andExpect(jsonPath("$.message", is("Cuboid not found")));
     }
 
     @Test
     void shouldGetErrorOnUpdateWhenBagIdIsNotFound() throws Exception {
-        assertTrue(true);
+    	CuboidDTO cuboidDTO = CuboidDTO.builder()
+                .id(1l).width(2f).height(3f).depth(2f).volume(12d).bagId(5L).build();
+
+        this.mockMvc.perform(put(PATH).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cuboidDTO)))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Bag not found")));
     }
 
     @Test
     void shouldGetErrorOnUpdateWhenBagCantProcessCuboidVolumeChange() throws Exception {
-        assertTrue(true);
+    	CuboidDTO cuboidDTO = CuboidDTO.builder()
+                .id(1l).width(10f).height(20f).depth(30f).volume(30d).bagId(1L).build();
+    	this.mockMvc.perform(put(PATH).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cuboidDTO)))
+    	.andExpect(status().isUnprocessableEntity())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Bag with not enough capacity")));
+    	
     }
 
     @Test
     void shouldDeleteCuboid() throws Exception {
-        assertTrue(true);
+    	  this.mockMvc.perform(delete(PATH + "/{id}", 1l))
+          .andExpect(status().isNoContent());
     }
 
     @Test
     void shouldNotDeleteWhenCuboidNotFound() throws Exception {
-        assertTrue(true);
+    	this.mockMvc.perform(delete(PATH + "/{id}", 6l))
+    	.andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message", is("Cuboid not found")));
     }
     
     /************************************************************

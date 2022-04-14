@@ -1,6 +1,7 @@
 package co.fullstacklabs.cuboid.challenge.controller;
 
 import co.fullstacklabs.cuboid.challenge.dto.CuboidDTO;
+import co.fullstacklabs.cuboid.challenge.model.Cuboid;
 import co.fullstacklabs.cuboid.challenge.service.CuboidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,5 +39,23 @@ public class CuboidController {
     public List<CuboidDTO> getAll() {
         return service.getAll();
     }
+    
+    @PutMapping
+    public ResponseEntity<CuboidDTO> update(@Valid @RequestBody final CuboidDTO cuboidDTO) {
+        CuboidDTO cuboid = service.update(cuboidDTO);
+        return new ResponseEntity<>(cuboid, HttpStatus.OK);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<Cuboid> getById(@PathVariable("id") Long id){
+    	return new ResponseEntity<>(service.getById(id), HttpStatus.OK);
+    }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteById(@PathVariable("id") Long id){
+    	service.delete(id);
+    	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    
 
 }
